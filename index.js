@@ -9,29 +9,29 @@ module.exports = function (archive, opts) {
   var downloadSpeed = speedometer()
   var uploadSpeed = speedometer()
   var timeout = opts.timeout || 500
-  var upInterval = null
-  var downInterval = null
+  var upTimeout = null
+  var downTimeout = null
 
   archive.on('download', function (data) {
     downloadSpeed(data.length)
-    if (downInterval) clearInterval(downInterval)
-    downInterval = setInterval(downTimeout, timeout)
+    if (downTimeout) clearTimeout(downTimeout)
+    downTimeout = setTimeout(downZero, timeout)
   })
 
   archive.on('upload', function (data) {
     uploadSpeed(data.length)
-    if (upInterval) clearInterval(upInterval)
-    upInterval = setInterval(upTimeout, timeout)
+    if (upTimeout) clearTimeout(upTimeout)
+    upTimeout = setTimeout(upZero, timeout)
   })
 
   // Zero out for uploads & disconnections
-  var downTimeout = function () {
+  var downZero = function () {
     downloadSpeed = speedometer()
-    if (downInterval) clearInterval(downInterval)
+    if (downTimeout) clearTimeout(downTimeout)
   }
-  var upTimeout = function () {
+  var upZero = function () {
     uploadSpeed = speedometer()
-    if (upInterval) clearInterval(upInterval)
+    if (upTimeout) clearTimeout(upTimeout)
   }
 
   // Zero out for downloads
@@ -39,7 +39,7 @@ module.exports = function (archive, opts) {
     archive.open(function () {
       archive.content.once('download-finished', function () {
         downloadSpeed = speedometer()
-        if (downInterval) clearInterval(downInterval)
+        if (downTimeout) clearTimeout(downTimeout)
       })
     })
   })
