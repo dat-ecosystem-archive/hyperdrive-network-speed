@@ -1,0 +1,31 @@
+{
+  "name": "hyperdrive-network-speed",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "tape test.js | tap-spec"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/joehand/hyperdrive-network-speed.git"
+  },
+  "author": "Joe Hand <joe@hand.email> (https://joeahand.com/)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/joehand/hyperdrive-network-speed/issues"
+  },
+  "homepage": "https://github.com/joehand/hyperdrive-network-speed#readme",
+  "dependencies": {
+    "speedometer": "^1.0.0"
+  },
+  "devDependencies": {
+    "hyperdiscovery": "^1.0.1",
+    "hyperdrive": "^7.9.0",
+    "memdb": "^1.3.1",
+    "random-access-file": "^1.3.1",
+    "standard": "^8.6.0",
+    "tap-spec": "^4.1.1",
+    "tape": "^4.6.3"
+  }
+}
