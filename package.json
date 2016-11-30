@@ -1,7 +1,7 @@
 {
   "name": "hyperdrive-network-speed",
   "version": "1.0.0",
-  "description": "",
+  "description": "track hyperdrive archive upload and download speeds",
   "main": "index.js",
   "scripts": {
     "test": "tape test.js | tap-spec"
