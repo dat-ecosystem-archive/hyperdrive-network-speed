@@ -16,7 +16,10 @@ var swarm = hyperdiscovery(archive)
 
 archive.append('test.js', function (err) {
   if (err) throw err
-  tests()
+  archive.append('index.js', function (err) {
+    if (err) throw err
+    tests()
+  })
 })
 
 function tests () {
@@ -43,12 +46,13 @@ function tests () {
     var swarmClient = hyperdiscovery(archiveClient)
 
     var speed = networkSpeed(archiveClient)
-
-    archiveClient.once('download', function () {
-      t.ok(speed.downloadSpeed && speed.downloadSpeed > 0, 'has download speed')
-      archiveClient.close(function () {
-        swarmClient.close(function () {
-          t.end()
+    archiveClient.open(function () {
+      archiveClient.content.once('download', function () {
+        t.ok(speed.downloadSpeed && speed.downloadSpeed > 0, 'has download speed')
+        archiveClient.close(function () {
+          swarmClient.close(function () {
+            t.end()
+          })
         })
       })
     })
@@ -64,14 +68,18 @@ function tests () {
     archiveClient.open(function (err) {
       if (err) throw err
       archiveClient.content.once('download-finished', function () {
-        t.ok(speedDown.downloadSpeed === 0, 'download speed zero')
-        archiveClient.close(function () {
-          swarmClient.close(function () {
-            t.end()
-          })
-        })
+        setTimeout(ondone, 300)
       })
     })
+
+    function ondone () {
+      t.ok(speedDown.downloadSpeed === 0, 'download speed zero')
+      archiveClient.close(function () {
+        swarmClient.close(function () {
+          t.end()
+        })
+      })
+    }
   })
 
   test('zeros out speed after disconnection', function (t) {

@@ -1,4 +1,6 @@
-# hyperdrive-network-speed [![Travis](https://img.shields.io/travis/joehand/hyperdrive-network-speed.svg?style=flat-square)](https://travis-ci.org/joehand/hyperdrive-network-speed) [![npm](https://img.shields.io/npm/v/hyperdrive-network-speed.svg?style=flat-square)](https://npmjs.org/package/hyperdrive-network-speed)
+# hyperdrive-network-speed
+
+[![Travis](https://img.shields.io/travis/joehand/hyperdrive-network-speed.svg?style=flat-square)](https://travis-ci.org/joehand/hyperdrive-network-speed) [![npm](https://img.shields.io/npm/v/hyperdrive-network-speed.svg?style=flat-square)](https://npmjs.org/package/hyperdrive-network-speed)
 
 Get upload and download speeds for a hyperdrive archive.
 
