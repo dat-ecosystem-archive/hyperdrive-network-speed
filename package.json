@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/joehand/hyperdrive-network-speed#readme",
   "dependencies": {
+    "debug": "^2.6.1",
     "speedometer": "^1.0.0"
   },
   "devDependencies": {

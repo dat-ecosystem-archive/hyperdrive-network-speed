@@ -1,5 +1,6 @@
 var assert = require('assert')
 var speedometer = require('speedometer')
+var debug = require('debug')('dat-network')
 
 module.exports = function (archive, opts) {
   assert.ok(archive, 'archive required')
@@ -8,26 +9,41 @@ module.exports = function (archive, opts) {
   var speed = {}
   var downloadSpeed = speedometer()
   var uploadSpeed = speedometer()
-  var timeout = opts.timeout || 500
+  var timeout = opts.timeout || 1000
   var upTimeout = null
   var downTimeout = null
+  var totalTransfer = {
+    up: 0,
+    down: 0
+  }
+
+  if (debug.enabled) {
+    setInterval(function () {
+      if (totalTransfer.up) debug('Uploaded data:', totalTransfer.up)
+      if (totalTransfer.down) debug('Downloaded data:', totalTransfer.down)
+    }, 500)
+  }
 
   archive.open(function () {
     archive.metadata.on('download', function (block, data) {
+      totalTransfer.down += data
       if (!archive.content.blocksRemaining()) return
       ondownload(data.length)
     })
 
     archive.metadata.on('upload', function (block, data) {
+      totalTransfer.up += data
       onupload(data.length)
     })
 
     archive.on('download', function (data) {
+      totalTransfer.down += data
       if (archive.content.blocks && archive.content.blocksRemaining() === 0) return // TODO: hyperdrive fires download-finished before last download
       ondownload(data.length)
     })
 
     archive.on('upload', function (data) {
+      totalTransfer.up += data
       onupload(data.length)
     })
 
