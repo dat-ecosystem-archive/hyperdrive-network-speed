@@ -64,10 +64,12 @@ module.exports = function (archive, opts) {
   })
 
   Object.defineProperty(speed, 'downloadSpeed', {
+    enumerable: true,
     get: function () { return downloadSpeed() }
   })
 
   Object.defineProperty(speed, 'uploadSpeed', {
+    enumerable: true,
     get: function () { return uploadSpeed() }
   })
 
