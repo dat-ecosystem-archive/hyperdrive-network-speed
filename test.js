@@ -32,6 +32,7 @@ function tests () {
 
     archive.once('upload', function () {
       t.ok(speed.uploadSpeed && speed.uploadSpeed > 0, 'has upload speed')
+      t.ok(Object.keys(speed).indexOf('uploadSpeed') > -1, 'uploadSpeed enumerable')
       archiveClient.close(function () {
         swarmClient.close(function () {
           t.end()
@@ -49,6 +50,7 @@ function tests () {
     archiveClient.open(function () {
       archiveClient.content.once('download', function () {
         t.ok(speed.downloadSpeed && speed.downloadSpeed > 0, 'has download speed')
+        t.ok(Object.keys(speed).indexOf('downloadSpeed') > -1, 'downloadSpeed enumerable')
         archiveClient.close(function () {
           swarmClient.close(function () {
             t.end()
