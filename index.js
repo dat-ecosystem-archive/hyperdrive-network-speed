@@ -24,7 +24,7 @@ module.exports = function (archive, opts) {
     }, 500)
   }
 
-  archive.open(function () {
+  archive.ready(function () {
     archive.metadata.on('download', function (block, data) {
       totalTransfer.down += data.length
       if (!archive.content.blocksRemaining()) return
@@ -36,13 +36,13 @@ module.exports = function (archive, opts) {
       onupload(data.length)
     })
 
-    archive.on('download', function (data) {
+    archive.content.on('download', function (block, data) {
       totalTransfer.down += data.length
       if (archive.content.blocks && archive.content.blocksRemaining() === 0) return // TODO: hyperdrive fires download-finished before last download
       ondownload(data.length)
     })
 
-    archive.on('upload', function (data) {
+    archive.content.on('upload', function (block, data) {
       totalTransfer.up += data.length
       onupload(data.length)
     })
