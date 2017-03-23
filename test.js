@@ -74,7 +74,7 @@ function run () {
       })
 
       function ondone () {
-        t.ok(speedDown.downloadSpeed === 0, 'download speed zero')
+        t.same(speedDown.downloadSpeed, 0, 'download speed zero')
         swarmClient.close(function () {
           t.end()
         })
@@ -84,22 +84,22 @@ function run () {
 
   test('zeros out speed after disconnection', function (t) {
     var archiveClient = hyperdrive(ram, archive.key)
-    var speedDown = networkSpeed(archiveClient)
-    var speedUp = networkSpeed(archive)
+    var speedDown = networkSpeed(archiveClient, {timeout: 250})
+    var speedUp = networkSpeed(archive, {timeout: 250})
 
     archiveClient.ready(function () {
       var swarmClient = hyperdiscovery(archiveClient)
       archiveClient.metadata.once('download', function () {
         setTimeout(function () {
-          t.ok(speedUp.uploadSpeed === 0, 'upload speed zero')
-          t.ok(speedDown.downloadSpeed === 0, 'download speed zero')
+          t.same(speedUp.uploadSpeed, 0, 'upload speed zero')
+          t.same(speedDown.downloadSpeed, 0, 'download speed zero')
 
           swarmClient.close(function () {
             swarm.close(function () {
               t.end()
             })
           })
-        }, 1000)
+        }, 500)
         swarmClient.leave(archive.key)
       })
     })
