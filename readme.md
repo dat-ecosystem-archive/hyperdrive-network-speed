@@ -7,7 +7,7 @@ Get upload and download speeds for a hyperdrive archive.
 ## Usage
 
 ```js
-var archive = drive.createArchive()
+var archive = hyperdrive('.dat')
 var swarm = hyperdiscovery(archive)
 var speed = networkSpeed(archive, {timeout: 1000})
 

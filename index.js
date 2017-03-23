@@ -24,17 +24,17 @@ module.exports = function (archive, opts) {
     }, 500)
   }
 
-  archive.ready(function () {
-    archive.metadata.on('download', function (block, data) {
-      totalTransfer.down += data.length
-      ondownload(data.length)
-    })
+  archive.metadata.on('download', function (block, data) {
+    totalTransfer.down += data.length
+    ondownload(data.length)
+  })
 
-    archive.metadata.on('upload', function (block, data) {
-      totalTransfer.up += data.length
-      onupload(data.length)
-    })
+  archive.metadata.on('upload', function (block, data) {
+    totalTransfer.up += data.length
+    onupload(data.length)
+  })
 
+  archive.on('content', function () {
     archive.content.on('download', function (block, data) {
       totalTransfer.down += data.length
       ondownload(data.length)
