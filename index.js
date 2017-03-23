@@ -44,23 +44,6 @@ module.exports = function (archive, opts) {
       totalTransfer.up += data.length
       onupload(data.length)
     })
-
-    // Zero out after downloads finishes after update
-    // TODO
-    // archive.metadata.on('update', function () {
-    //   archive.content.once('download-finished', function () {
-    //     if (archive.metadata.blocksRemaining()) return
-    //     downloadSpeed = speedometer()
-    //     if (downTimeout) clearTimeout(downTimeout)
-    //   })
-    // })
-
-    // // Zero out after download finished
-    // TODO
-    // archive.content.once('download-finished', function () {
-    //   downloadSpeed = speedometer()
-    //   if (downTimeout) clearTimeout(downTimeout)
-    // })
   })
 
   Object.defineProperty(speed, 'downloadSpeed', {
