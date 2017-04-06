@@ -1,39 +1,40 @@
+require('leaked-handles')
+var fs = require('fs')
 var test = require('tape')
 var hyperdrive = require('hyperdrive')
-var memdb = require('memdb')
+var ram = require('random-access-memory')
 var hyperdiscovery = require('hyperdiscovery')
-var raf = require('random-access-file')
+var pump = require('pump')
 
 var networkSpeed = require('.')
 
-var drive = hyperdrive(memdb())
-var archive = drive.createArchive({
-  file: function (name) {
-    return raf(name)
-  }
-})
-var swarm = hyperdiscovery(archive)
+var archive = hyperdrive(ram)
+var swarm
 
-archive.append('test.js', function (err) {
-  if (err) throw err
-  archive.append('index.js', function (err) {
+archive.ready(function () {
+  swarm = hyperdiscovery(archive)
+
+  pump(fs.createReadStream('test.js'), archive.createWriteStream('test.js'), function (err) {
     if (err) throw err
-    tests()
+    pump(fs.createReadStream('test.js'), archive.createWriteStream('test.js'), function (err) {
+      if (err) throw err
+      run()
+    })
   })
 })
 
-function tests () {
+function run () {
   test('tracks upload speed', function (t) {
     var speed = networkSpeed(archive)
 
-    var driveClient = hyperdrive(memdb())
-    var archiveClient = driveClient.createArchive(archive.key)
-    var swarmClient = hyperdiscovery(archiveClient)
+    var archiveClient = hyperdrive(ram, archive.key)
 
-    archive.once('upload', function () {
-      t.ok(speed.uploadSpeed && speed.uploadSpeed > 0, 'has upload speed')
-      t.ok(Object.keys(speed).indexOf('uploadSpeed') > -1, 'uploadSpeed enumerable')
-      archiveClient.close(function () {
+    archiveClient.ready(function () {
+      var swarmClient = hyperdiscovery(archiveClient)
+
+      archive.content.once('upload', function () {
+        t.ok(speed.uploadSpeed && speed.uploadSpeed > 0, 'has upload speed')
+        t.ok(Object.keys(speed).indexOf('uploadSpeed') > -1, 'uploadSpeed enumerable')
         swarmClient.close(function () {
           t.end()
         })
@@ -42,16 +43,16 @@ function tests () {
   })
 
   test('tracks download speed', function (t) {
-    var driveClient = hyperdrive(memdb())
-    var archiveClient = driveClient.createArchive(archive.key)
-    var swarmClient = hyperdiscovery(archiveClient)
-
+    var archiveClient = hyperdrive(ram, archive.key)
     var speed = networkSpeed(archiveClient)
-    archiveClient.open(function () {
-      archiveClient.content.once('download', function () {
-        t.ok(speed.downloadSpeed && speed.downloadSpeed > 0, 'has download speed')
-        t.ok(Object.keys(speed).indexOf('downloadSpeed') > -1, 'downloadSpeed enumerable')
-        archiveClient.close(function () {
+
+    archiveClient.ready(function () {
+      var swarmClient = hyperdiscovery(archiveClient)
+
+      archiveClient.once('content', function () {
+        archiveClient.content.once('download', function () {
+          t.ok(speed.downloadSpeed && speed.downloadSpeed > 0, 'has download speed')
+          t.ok(Object.keys(speed).indexOf('downloadSpeed') > -1, 'downloadSpeed enumerable')
           swarmClient.close(function () {
             t.end()
           })
@@ -61,56 +62,46 @@ function tests () {
   })
 
   test('zeros out speed after finishing', function (t) {
-    var driveClient = hyperdrive(memdb())
-    var archiveClient = driveClient.createArchive(archive.key)
-    var swarmClient = hyperdiscovery(archiveClient)
-
+    var archiveClient = hyperdrive(ram, archive.key)
     var speedDown = networkSpeed(archiveClient)
+    var stream = archiveClient.replicate({live: false})
 
-    archiveClient.open(function (err) {
-      if (err) throw err
-      archiveClient.content.once('download-finished', function () {
+    archiveClient.ready(function () {
+      var swarmClient = hyperdiscovery(archiveClient, {stream: function () { return stream}})
+
+      stream.once('close', function () {
         setTimeout(ondone, 300)
       })
-    })
 
-    function ondone () {
-      t.ok(speedDown.downloadSpeed === 0, 'download speed zero')
-      archiveClient.close(function () {
+      function ondone () {
+        t.same(speedDown.downloadSpeed, 0, 'download speed zero')
         swarmClient.close(function () {
           t.end()
         })
-      })
-    }
+      }
+    })
   })
 
   test('zeros out speed after disconnection', function (t) {
-    var driveClient = hyperdrive(memdb())
-    var archiveClient = driveClient.createArchive(archive.key)
-    var swarmClient = hyperdiscovery(archiveClient)
+    var archiveClient = hyperdrive(ram, archive.key)
+    var speedDown = networkSpeed(archiveClient, {timeout: 250})
+    var speedUp = networkSpeed(archive, {timeout: 250})
 
-    var speedUp = networkSpeed(archive)
-    var speedDown = networkSpeed(archiveClient)
-
-    archiveClient.once('download', function () {
-      archive.append('index.js', function () {
-        // make sure not all of it is downloaded before disconnection
+    archiveClient.ready(function () {
+      var swarmClient = hyperdiscovery(archiveClient)
+      archiveClient.metadata.once('download', function () {
         setTimeout(function () {
-          t.ok(speedUp.uploadSpeed === 0, 'upload speed zero')
-          t.ok(speedDown.downloadSpeed === 0, 'download speed zero')
+          t.same(speedUp.uploadSpeed, 0, 'upload speed zero')
+          t.same(speedDown.downloadSpeed, 0, 'download speed zero')
 
-          archiveClient.close(function () {
-            swarmClient.close(function () {
-              archive.close(function () {
-                swarm.close(function () {
-                  t.end()
-                })
-              })
+          swarmClient.close(function () {
+            swarm.close(function () {
+              t.end()
             })
           })
-        }, 1000)
+        }, 500)
+        swarmClient.leave(archive.key)
       })
-      swarmClient.leave(archive.key)
     })
   })
 }

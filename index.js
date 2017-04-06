@@ -24,42 +24,25 @@ module.exports = function (archive, opts) {
     }, 500)
   }
 
-  archive.open(function () {
-    archive.metadata.on('download', function (block, data) {
+  archive.metadata.on('download', function (block, data) {
+    totalTransfer.down += data.length
+    ondownload(data.length)
+  })
+
+  archive.metadata.on('upload', function (block, data) {
+    totalTransfer.up += data.length
+    onupload(data.length)
+  })
+
+  archive.on('content', function () {
+    archive.content.on('download', function (block, data) {
       totalTransfer.down += data.length
-      if (!archive.content.blocksRemaining()) return
       ondownload(data.length)
     })
 
-    archive.metadata.on('upload', function (block, data) {
+    archive.content.on('upload', function (block, data) {
       totalTransfer.up += data.length
       onupload(data.length)
-    })
-
-    archive.on('download', function (data) {
-      totalTransfer.down += data.length
-      if (archive.content.blocks && archive.content.blocksRemaining() === 0) return // TODO: hyperdrive fires download-finished before last download
-      ondownload(data.length)
-    })
-
-    archive.on('upload', function (data) {
-      totalTransfer.up += data.length
-      onupload(data.length)
-    })
-
-    // Zero out after downloads finishes after update
-    archive.metadata.on('update', function () {
-      archive.content.once('download-finished', function () {
-        if (archive.metadata.blocksRemaining()) return
-        downloadSpeed = speedometer()
-        if (downTimeout) clearTimeout(downTimeout)
-      })
-    })
-
-    // Zero out after download finished
-    archive.content.once('download-finished', function () {
-      downloadSpeed = speedometer()
-      if (downTimeout) clearTimeout(downTimeout)
     })
   })
 
