@@ -1,4 +1,3 @@
-require('leaked-handles')
 var fs = require('fs')
 var test = require('tape')
 var hyperdrive = require('hyperdrive')
