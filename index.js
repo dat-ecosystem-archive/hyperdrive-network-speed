@@ -34,17 +34,8 @@ module.exports = function (archive, opts) {
     onupload(data.length)
   })
 
-  archive.on('content', function () {
-    archive.content.on('download', function (block, data) {
-      totalTransfer.down += data.length
-      ondownload(data.length)
-    })
-
-    archive.content.on('upload', function (block, data) {
-      totalTransfer.up += data.length
-      onupload(data.length)
-    })
-  })
+  if (archive.content) trackContent()
+  else archive.on('content', trackContent)
 
   Object.defineProperty(speed, 'downloadSpeed', {
     enumerable: true,
@@ -57,6 +48,18 @@ module.exports = function (archive, opts) {
   })
 
   return speed
+
+  function trackContent () {
+    archive.content.on('download', function (block, data) {
+      totalTransfer.down += data.length
+      ondownload(data.length)
+    })
+
+    archive.content.on('upload', function (block, data) {
+      totalTransfer.up += data.length
+      onupload(data.length)
+    })
+  }
 
   // Zero out for uploads & disconnections
   function downZero () {
