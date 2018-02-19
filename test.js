@@ -32,6 +32,7 @@ function run () {
       var swarmClient = hyperdiscovery(archiveClient)
 
       archive.content.once('upload', function () {
+        t.ok(speed.uploadTotal && speed.uploadTotal > 0, 'has upload total')
         t.ok(speed.uploadSpeed && speed.uploadSpeed > 0, 'has upload speed')
         t.ok(Object.keys(speed).indexOf('uploadSpeed') > -1, 'uploadSpeed enumerable')
         swarmClient.close(function () {
@@ -50,6 +51,7 @@ function run () {
 
       archiveClient.once('content', function () {
         archiveClient.content.once('download', function () {
+          t.ok(speed.downloadTotal && speed.downloadTotal > 0, 'has download total')
           t.ok(speed.downloadSpeed && speed.downloadSpeed > 0, 'has download speed')
           t.ok(Object.keys(speed).indexOf('downloadSpeed') > -1, 'downloadSpeed enumerable')
           swarmClient.close(function () {
