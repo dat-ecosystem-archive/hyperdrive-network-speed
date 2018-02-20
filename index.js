@@ -47,6 +47,16 @@ module.exports = function (archive, opts) {
     get: function () { return uploadSpeed() }
   })
 
+  Object.defineProperty(speed, 'downloadTotal', {
+    enumerable: true,
+    get: function () { return totalTransfer.down }
+  })
+
+  Object.defineProperty(speed, 'uploadTotal', {
+    enumerable: true,
+    get: function () { return totalTransfer.up }
+  })
+
   return speed
 
   function trackContent () {
