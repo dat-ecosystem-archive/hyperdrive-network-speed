@@ -32,6 +32,14 @@ Archive upload speed across all peers.
 
 Archive download speed across all peers.
 
+#### `speed.downloadTotal`
+
+Archive total download.
+
+#### `speed.uploadTotal`
+
+Archive total upload.
+
 ## License
 
 MIT
