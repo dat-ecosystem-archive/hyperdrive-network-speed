@@ -1,6 +1,6 @@
 {
   "name": "hyperdrive-network-speed",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "description": "track hyperdrive archive upload and download speeds",
   "main": "index.js",
   "scripts": {
